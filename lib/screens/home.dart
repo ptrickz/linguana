@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:linguana/constants/jsondata.dart';
 import 'package:linguana/screens/speech_to_text.dart';
 import 'package:translator/translator.dart';
 
@@ -22,47 +23,9 @@ class _HomePageState extends State<HomePage> {
   String inputText = "";
   String inputLanguage = "en";
   String outputLanguage = "fr";
+  String tempLanguage = "";
   bool isTranslating = false;
   List<Language> languages = [];
-
-  static const jsonData = '''[
-  {
-    "name": "English",
-    "code": "en"
-  },
-  {
-    "name": "Malay",
-    "code": "ms"
-  },
-  {
-    "name": "French",
-    "code": "fr"
-  },
-  {
-    "name": "Spanish",
-    "code": "es"
-  },
-  {
-    "name": "German",
-    "code": "de"
-  },
-  {
-    "name": "Urdu",
-    "code": "ur"
-  },
-  {
-    "name": "Hindi",
-    "code": "hi"
-  },
-  {
-    "name": "Arabic",
-    "code": "ar"
-  },
-  {
-    "name": "Chinese (Simplified)",
-    "code": "zh-cn"
-  }
-]''';
 
   List<Language> parseLanguages(String jsonData) {
     final List<dynamic> decodedJson = jsonDecode(jsonData);
@@ -78,6 +41,14 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       outputController.text = translated.text;
       isTranslating = false;
+    });
+  }
+
+  void swapInputOutput() {
+    setState(() {
+      tempLanguage = inputLanguage;
+      inputLanguage = outputLanguage;
+      outputLanguage = tempLanguage;
     });
   }
 
@@ -132,6 +103,105 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("From"),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: DropdownButton<String>(
+                              dropdownColor: Colors.green,
+                              value: inputLanguage,
+                              onChanged: (newVal) {
+                                setState(() {
+                                  inputLanguage =
+                                      newVal!; // Update the selected language
+                                  if (inputController.text != "") {
+                                    translateText(); // Call translation if input is not empty
+                                  }
+                                });
+                              },
+                              items: languages.map<DropdownMenuItem<String>>(
+                                  (Language language) {
+                                return DropdownMenuItem<String>(
+                                  value: language
+                                      .code, // Use the language code as the value
+                                  child: Text(
+                                    language.name,
+                                    style: const TextStyle(color: Colors.white),
+                                  ), // Display the language name
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 60,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  swapInputOutput();
+                                },
+                                icon: const Icon(
+                                  Icons.swap_horiz,
+                                  size: 35,
+                                )),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("To"),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: DropdownButton<String>(
+                              value: outputLanguage,
+                              dropdownColor: Colors.green,
+                              onChanged: (newVal) {
+                                setState(() {
+                                  outputLanguage =
+                                      newVal!; // Update the selected language
+                                  if (inputController.text != "") {
+                                    translateText(); // Call translation if input is not empty
+                                  }
+                                });
+                              },
+                              items: languages.map<DropdownMenuItem<String>>(
+                                  (Language language) {
+                                return DropdownMenuItem<String>(
+                                  value: language
+                                      .code, // Use the language code as the value
+                                  child: Text(
+                                    language.name,
+                                    style: const TextStyle(color: Colors.white),
+                                  ), // Display the language name
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
                         child: Padding(
@@ -140,7 +210,10 @@ class _HomePageState extends State<HomePage> {
                             controller: inputController,
                             maxLines: 3,
                             decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8)),
+                              ),
                               hintText: "Enter a text to translate",
                             ),
                             onChanged: (value) {
@@ -181,74 +254,6 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(
                     height: 20,
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: DropdownButton<String>(
-                          value: inputLanguage,
-                          onChanged: (newVal) {
-                            setState(() {
-                              inputLanguage =
-                                  newVal!; // Update the selected language
-                              if (inputController.text != "") {
-                                translateText(); // Call translation if input is not empty
-                              }
-                            });
-                          },
-                          items: languages.map<DropdownMenuItem<String>>(
-                              (Language language) {
-                            return DropdownMenuItem<String>(
-                              value: language
-                                  .code, // Use the language code as the value
-                              child: Text(
-                                  language.name), // Display the language name
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text("Translate to"),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: DropdownButton<String>(
-                          value: outputLanguage,
-                          onChanged: (newVal) {
-                            setState(() {
-                              outputLanguage =
-                                  newVal!; // Update the selected language
-                              if (inputController.text != "") {
-                                translateText(); // Call translation if input is not empty
-                              }
-                            });
-                          },
-                          items: languages.map<DropdownMenuItem<String>>(
-                              (Language language) {
-                            return DropdownMenuItem<String>(
-                              value: language
-                                  .code, // Use the language code as the value
-                              child: Text(
-                                  language.name), // Display the language name
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -260,7 +265,10 @@ class _HomePageState extends State<HomePage> {
                             controller: outputController,
                             maxLines: 3,
                             decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8)),
+                              ),
                               hintText: "Results",
                             ),
                             onChanged: (value) {
@@ -285,9 +293,6 @@ class _HomePageState extends State<HomePage> {
                                 : Colors.green,
                           )),
                     ],
-                  ),
-                  const SizedBox(
-                    height: 20,
                   ),
                 ],
               ),
