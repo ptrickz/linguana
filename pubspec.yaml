@@ -37,8 +37,10 @@ dependencies:
   translator: ^1.0.0
   flutter_tts: ^4.0.2
   speech_to_text: ^7.0.0
+  another_flutter_splash_screen: ^1.2.1
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.14.2
   flutter_test:
     sdk: flutter
 
@@ -51,6 +53,11 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_launcher_icons:
+  android: "launcer_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
 
 # The following section is specific to Flutter packages.
 flutter:
